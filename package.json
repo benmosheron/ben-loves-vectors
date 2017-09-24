@@ -17,5 +17,9 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "mocha": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benmosheron/ben-loves-vectors.git"
   }
 }
