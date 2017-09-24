@@ -6,15 +6,19 @@ module.exports = {
     multiplyScalar: multiplyScalar,
     divideScalar: divideScalar,
     equals: equals,
+    isAVector: isAVector,
     floor: floor,
     create: create,
     create2: create2,
-    createRandom: createRandom
+    create2x2: create2x2,
+    createRandom: createRandom,
+    createWithDimensions: createWithDimensions
 }
 // Public functions
 
 // Calculate the magnitude of a vector.
 function magnitude(v) {
+    if(v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
     if (v.length === 0) {
         return 0;
     }
@@ -23,6 +27,7 @@ function magnitude(v) {
 
 // Calculate a new magnitude s vector with the same direction as v.
 function normalise(v, s) {
+    if (v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
     if (typeof s === "undefined") s = 1;
     if (v.magnitude() === 0) return v.map(e => e);
     return v.multiplyScalar(s / v.magnitude());
@@ -30,6 +35,9 @@ function normalise(v, s) {
 
 // Add two vectors of the same length
 function add(v1, v2) {
+    if (!isAVector(v1)) throw new Error("v1 must be a vector.");
+
+
     if (v1.length !== v2.length) throw `Vector addition requires equal lengths ([${v1.length}] != [${v2.length}])`;
 
     return v1.map(function (e, i) { return e + v2.array[i]; });
@@ -58,28 +66,43 @@ function equals(v1, v2) {
     return v1.reduce((acc, val, i) => acc && (v1.array[i] === v2.array[i]), true);
 }
 
+function isAVector(v){
+    if(undef(v) || v === null) return false;
+    if(undef(v.isAVector)) return false;
+    return v.isAVector;
+}
+
 function floor(v) {
     return v.map(e => Math.floor(e));
 }
 
-// Create a vector from an array of values.
-function create(array) {
-    
+// Create a vector from an array of values, or another vector.
+function create(arrayOrVector) {
+    const array = isAVector(arrayOrVector) ? arrayOrVector.array : arrayOrVector;
     if (!Array.isArray(array)) throw new Error(`Input must be an array. [${array}] is not an array.`);
+
+    // For dimension > 1, we convert each sub array to a vector.
+    const vectorArray = array.map(e => Array.isArray(e) ? create(e) : e);
 
     // The object we will be returning
     let vector = {
         // This vector's number array.
-        array: array,
+        array: vectorArray,
         // Length of this vector's array.
-        length: array.length,
+        length: vectorArray.length,
+        // The dimension of this vector.
+        dimension: getDepth(vectorArray),
+        // Indicate that we have a vector.
+        isAVector: true,
         // Shortcuts
-        // Creates a new vector from wrapping the result of array.map()
+        // Get the vectors ith element.
+        get: function (i) {return getElement(this, i); },
+        // Creates a new vector from wrapping the result of array.map().
         map: function (f) { return create(this.array.map(f)) },
-        // Creates a new vector from wrapping the result of array.reduce()
+        // Creates a new vector from wrapping the result of array.reduce().
         reduce: function (f, init) { return this.array.reduce(f, init) },
         // Calculate the magnitude of this vector.
-        magnitude: function () { return magnitude(this.array); },
+        magnitude: function () { return magnitude(this); },
         // Calculate a new magnitude s vector with the same direction as this one.
         normalise: function (s) { return normalise(this, s); },
         add: function (v2) { return add(this, v2); },
@@ -106,11 +129,35 @@ function create(array) {
     return vector;
 }
 
-// Create a vector of length two, providing x and y values.
+// Create a vector of length two, providing x and (optionally) y values.
 function create2(x, y) {
-    if (typeof x === "undefined") throw "At least one argument must be provided.";
+    if (typeof x === "undefined") throw new Error("At least one argument must be provided.");
     if (typeof y === "undefined") y = x;
     return create([x, y]);
+}
+
+// Create a 2D vector by providing one, two, or four values
+function create2x2(a, b, c, d){
+    if (undef(a)) throw new Error("At least one argument must be provided.");
+
+    if (undef(b)){
+        // Everything = a
+        b = a;
+        c = a;
+        d = a;
+    }
+    else{
+        // we have a and b
+        if(undef(c)){
+            c = a;
+            d = b;
+        }
+        else{
+            if(undef(d)) throw new Error("Argument 'd' must be provided if 'c' is.");
+        }
+    }
+
+    return create([[a, b],[c, d]]);
 }
 
 // Create a uniform random n-length vector, bounded by min (inclusive) and max (exclusive).
@@ -123,12 +170,67 @@ function createRandom(n, min, max) {
     return create(array);
 }
 
+// Create a vector with dimensions dims, and all values val.
+function createWithDimensions(dims, val){
+    if(!Array.isArray(dims)) throw new Error("dims must be an array.");
+    if(undef(val)) throw new Error("val must be defined.");
+    
+    const l = dims.pop();
+    const array = new Array(l).fill(val);
+
+    if(dims.length === 0) return create(array);
+    return createWithDimensions(dims, array);
+}
+
 // Private functions
 
-// Calculate the magnitude of an array of numbers.
-function magnitude(array) {
-    if (array.length === 0) {
-        return 0;
+function getDepthRec(vector, depth){
+    depth += 1;
+    // Input is always a vector of numbers or other vectors.
+    // If it is neither an array nor a vector, return now
+    let next = vector.get(0);
+    if(!isAVector(next)) return depth;
+    return getDepthRec(next, depth);
+}
+
+// Input may be an array of elements or vectors.
+// Input will either be an array of vectors, or an array of elements.
+// Never an array of arrays.
+// A -> 123
+// A -> VVV -> 123 123 123
+// A -> VVV -> VVV VVV VVV -> 123 ... 123
+function getDepth(array){ 
+    const first = array[0];
+    if(!isAVector(first)) return 1
+    return getDepthRec(first, 1);
+ }
+
+function getElementFromIndex(vector, i){
+    if(i >= vector.length) throw new Error(`Index ${i} is out of bounds.`);
+    return vector.array[i];
+}
+
+function getElementFromIndexArray(vector, indexArray){
+    // Assert all are numbers
+    if(!indexArray.every(i => typeof i === "number")) throw new Error("get requires all indices to be numbers.");
+    // Check dimension is OK
+    if(indexArray.length > vector.dimension) throw new Error(`Too many indices [${indexArray.length}] to access a ${vector.dimension}D vector.`);
+    if(indexArray.length === 1) return getElementFromIndex(vector, indexArray[0]);
+    const i = indexArray.shift();
+    return getElementFromIndexArray(getElementFromIndex(vector, i), indexArray);
+}
+
+function getElement(vector, i){
+    if(!isAVector(vector)) throw new Error(`Not a vector [${vector}]`);
+    // if i is an array, use it for multi dimension access.
+    // Use an array
+    if(Array.isArray(i)){
+        return getElementFromIndexArray(vector, i);
     }
-    return Math.sqrt(array.reduce(function (t, n) { return t + (n * n); }, 0));
+    // Use the single index
+    return getElementFromIndex(vector, i);
+ }
+
+function undef(obj){
+    return typeof obj === "undefined";
 }

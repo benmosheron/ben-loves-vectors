@@ -50,6 +50,50 @@ describe("vector", function () {
             assert.strictEqual(v.length, N);
             for (var i = 0; i < N; i++) { assert.strictEqual(v.array[i], a[i]); }
         });
+        it("should create a 1D vector from an array of numbers", function () {
+            let v = vector.create([x,y]);
+            isAVector(v);
+            assert.equal(v.dimension, 1);
+        });
+        it("should create a 2D, length 2 vector from an array of arrays of 2 numbers", function () {
+            let v = vector.create(
+                [
+                    [x,y],
+                    [x,y]
+                ]
+            );
+            isAVector(v);
+            isAVector(v.array[0]);
+            isAVector(v.array[1]);
+            assert.equal(v.length, 2, "length");
+            assert.equal(v.get(0).length, 2, "length of sub-vector 0");
+            assert.equal(v.get(1).length, 2, "length of sub-vector 1");
+            assert.equal(v.dimension, 2, "dimension");
+            assert.equal(v.get(0).dimension, 1, "dimension of sub-vector 0");
+            assert.equal(v.get(1).dimension, 1, "dimension of sub-vector 1");
+        });
+        it("should create a 3D vector from an array of arrays of arrays of numbers", function () {
+            let v = vector.create(
+                [
+                    [
+                        [0,1],
+                        [2,3]
+                    ],
+                    [
+                        [4,5],
+                        [6,7]
+                    ],
+                ]
+            );
+            isAVector(v);
+            isAVector(v.array[0]);
+            isAVector(v.array[1]);
+            isAVector(v.array[0].array[0]);
+            isAVector(v.array[0].array[1]);
+            isAVector(v.array[1].array[0]);
+            isAVector(v.array[1].array[1]);
+            assert.equal(v.dimension, 3);
+        });
     });
 
     describe("#create2()", function () {
@@ -72,6 +116,42 @@ describe("vector", function () {
         });
     });
 
+    describe("#create2x2()", function () {
+        it("should throw if no argument is provided", function () {
+            assert.throws(vector.create2x2, Error);
+        });
+        it("should create a 2D, length 2 vector from a single input", function () {
+            let v = vector.create2x2(x);
+            isAVector(v);
+            assert.strictEqual(v.length, 2, "length");
+            assert.strictEqual(v.dimension, 2, "dimension");
+            assert.strictEqual(v.get([0,0]), x);
+            assert.strictEqual(v.get([0,1]), x);
+            assert.strictEqual(v.get([1,0]), x);
+            assert.strictEqual(v.get([1,1]), x);
+        });
+        it("should create a 2D, length 2 vector from two inputs", function () {
+            let v = vector.create2x2(x, y);
+            isAVector(v);
+            assert.strictEqual(v.length, 2, "length");
+            assert.strictEqual(v.dimension, 2, "dimension");
+            assert.strictEqual(v.get([0,0]), x);
+            assert.strictEqual(v.get([0,1]), y);
+            assert.strictEqual(v.get([1,0]), x);
+            assert.strictEqual(v.get([1,1]), y);
+        });
+        it("should create a 2D, length 2 vector from all arguments", function () {
+            let v = vector.create2x2(x, y, z, z*2);
+            isAVector(v);
+            assert.strictEqual(v.length, 2, "length");
+            assert.strictEqual(v.dimension, 2, "dimension");
+            assert.strictEqual(v.get([0,0]), x);
+            assert.strictEqual(v.get([0,1]), y);
+            assert.strictEqual(v.get([1,0]), z);
+            assert.strictEqual(v.get([1,1]), z*2);
+        });
+    });
+
     describe("#createRandom()", function () {
         it("should create an N length random vector with elements between min and max", function () {
             let N = 1000;
@@ -85,6 +165,33 @@ describe("vector", function () {
                 assert(v.array[i] < max);
             }
         })
+    });
+
+    describe("#get()", function () {
+        it("should throw if the element is out of bounds", function(){
+            assert.throws(() => vector.create([1]).get(1));
+        });
+        it("should get the correct element from a 1D matrix", function(){
+            assert.strictEqual(vector.create([0,1,2]).get(2), 2);
+        });
+        it("should get the correct element from a 2D matrix", function(){
+            let v = vector.create([[0,2],[3,4]]);
+            let row0 = v.get(0);
+            let row1 = v.get(1);
+            isAVector(row0);
+            isAVector(row1);
+            assert.strictEqual(row0.get(0), 0);
+            assert.strictEqual(row0.get(1), 2);
+            assert.strictEqual(row1.get(0), 3);
+            assert.strictEqual(row1.get(1), 4);
+        });
+        it("should get the correct element from a 2D matrix via array", function(){
+            let v = vector.create([[0,2],[3,4]]);
+            assert.strictEqual(v.get([0,0]), 0);
+            assert.strictEqual(v.get([0,1]), 2);
+            assert.strictEqual(v.get([1,0]), 3);
+            assert.strictEqual(v.get([1,1]), 4);
+        });
     });
 
     describe("v.map()", function () {
@@ -108,6 +215,11 @@ describe("vector", function () {
     });
 
     describe("#magnitude()", function () {
+        it("should throw for dimension > 1", function () {
+            let v = vector.create([[3, 4],[1, 2]]);
+            assert.throws(() => v.magnitude(), Error);
+            assert.throws(() => vector.magnitude(v), Error);
+        });
         it("should calculate the magnitude of a 2-vector", function () {
             let v = vector.create([3, 4]); // 5
             let m = doBoth(
@@ -148,6 +260,11 @@ describe("vector", function () {
                 assert.strictEqual(normalised.magnitude(), 0, "normalised vector of a zero vectorshould have magnitude 0.");
             assertVectorsBasicallyEqual(normalised, expected);
         }
+        it("should throw for dimension > 1", function () {
+            let v = vector.create([[3, 4],[1, 2]]);
+            assert.throws(() => v.normalise(), Error);
+            assert.throws(() => vector.normalise(v), Error);
+        });
         it("should normalise a 2-vector", function () {
             let v = vector.create([3, 4]); //5
             let n = doBoth(
@@ -189,6 +306,14 @@ describe("vector", function () {
             let r = doBoth(
                 () => vector.add(v1, v2),
                 () => v1.add(v2),
+                assertVectorsBasicallyEqual);
+            assertVectorsBasicallyEqual(r, vector.create([3, 0, 5]));
+        });
+        it("should add a vector and a scalar", function () {
+            let v1 = vector.create([1, -2, 3]);
+            let r = doBoth(
+                () => vector.add(v1, 10),
+                () => v1.add(10),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([3, 0, 5]));
         });
@@ -258,12 +383,34 @@ describe("vector", function () {
         });
     });
 
+    describe("#createWithDimensions()", function () {
+        it("should create with 2D dimensions", function () {
+            let v = vector.createWithDimensions([2,3],1);
+            assert.strictEqual(v.dimension, 2);
+            assert.strictEqual(v.get([0,0]), 1);
+            assert.strictEqual(v.get([1,1]), 1);
+            assert.strictEqual(v.get([0,2]), 1);
+            assert.strictEqual(v.get([1,0]), 1);
+            assert.strictEqual(v.get([0,1]), 1);
+            assert.strictEqual(v.get([1,2]), 1);
+        });
+        it("should create with 3D dimensions", function () {
+            let v = vector.createWithDimensions([2,3,4],2);
+            assert.strictEqual(v.dimension, 3);
+            assert.strictEqual(v.get([0,0,0]), 2);
+            assert.strictEqual(v.get([1,1,1]), 2);
+            assert.strictEqual(v.get([1,2,3]), 2);
+            assert.strictEqual(v.get([1,2,3]), 2);
+        });
+    });
+
 });
 
 function isAVector(v) {
     assert.strictEqual("object", typeof v);
     assert(Array.isArray(v.array));
     assert.strictEqual("number", typeof v.length);
+    assert.strictEqual(v.isAVector, true);
 }
 
 function doBoth(staticFunction, memberFunction, assertion) {
