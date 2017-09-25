@@ -80,6 +80,7 @@ function floor(v) {
 function create(arrayOrVector) {
     const array = isAVector(arrayOrVector) ? arrayOrVector.array : arrayOrVector;
     if (!Array.isArray(array)) throw new Error(`Input must be an array. [${array}] is not an array.`);
+    if(arguments.length > 1) throw new Error("More than one argument provided to create.");
 
     // For dimension > 1, we convert each sub array to a vector.
     const vectorArray = array.map(e => Array.isArray(e) ? create(e) : e);

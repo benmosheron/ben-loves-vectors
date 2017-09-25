@@ -15,6 +15,9 @@ describe("vector", function () {
             assert.throws(function () { vector.create("yo"); }, Error);
             assert.throws(function () { vector.create(3); }, Error);
         });
+        it("should throw if multiple arguments are provided", function () {
+            assert.throws(function () { vector.create([1,2],[3,4]); }, Error);
+        });
         it("should create an empty vector from an empty array", function () {
             let v = vector.create([]);
             isAVector(v);
