@@ -6,7 +6,7 @@ describe("vector", function () {
     let x = 1.01;
     let y = -39.01;
     let z = 1093.1239;
-    describe("#create()", function () {
+    describe("create()", function () {
 
         it("should throw if the argument is not an array", function () {
             assert.throws(function () { vector.create(); }, Error);
@@ -99,7 +99,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#create2()", function () {
+    describe("create2()", function () {
         it("should throw if no argument is provided", function () {
             assert.throws(vector.create2);
         });
@@ -119,7 +119,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#create2x2()", function () {
+    describe("create2x2()", function () {
         it("should throw if no argument is provided", function () {
             assert.throws(vector.create2x2, Error);
         });
@@ -155,7 +155,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#createRandom()", function () {
+    describe("createRandom()", function () {
         it("should create an N length random vector with elements between min and max", function () {
             let N = 1000;
             let min = -1;
@@ -170,7 +170,7 @@ describe("vector", function () {
         })
     });
 
-    describe("#get()", function () {
+    describe("get()", function () {
         it("should throw if the element is out of bounds", function(){
             assert.throws(() => vector.create([1]).get(1));
         });
@@ -229,7 +229,7 @@ describe("vector", function () {
         });
     });
 
-    describe("v.map()", function () {
+    describe("map()", function () {
         it("should provide an analogue to Array.map()", function () {
             let v = vector.create([x, y, z]);
             let vDoubled = v.map(e => e * 2);
@@ -241,7 +241,13 @@ describe("vector", function () {
         });
     });
 
-    describe("v.reduce()", function () {
+    describe("cascadeMap()", function () {
+        it("should map a function onto each element", function () {
+            assert.fail();
+        });
+    });
+
+    describe("reduce()", function () {
         it("should provide an analogue to Array.reduce()", function () {
             let v = vector.create([x, y, z]);
             let r = v.reduce((acc, val) => acc + val, 0);
@@ -249,7 +255,13 @@ describe("vector", function () {
         });
     });
 
-    describe("#magnitude()", function () {
+    describe("cascadeReduce()", function () {
+        it("should reduce a vector to a single element", function () {
+            assert.fail();
+        });
+    });
+
+    describe("magnitude()", function () {
         it("should throw for dimension > 1", function () {
             let v = vector.create([[3, 4],[1, 2]]);
             assert.throws(() => v.magnitude(), Error);
@@ -285,7 +297,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#normalise()", function () {
+    describe("normalise()", function () {
         function doNormaliseAssertions(normalised, original, expected) {
             isAVector(normalised);
             assert.strictEqual(normalised.length, original.length, "normalised vector should have the same length as the unnormalised.");
@@ -334,7 +346,13 @@ describe("vector", function () {
         });
     });
 
-    describe("#add()", function () {
+    describe("negate()", function () {
+        it("should negate a vector", function () {
+            assert.fail();
+        });
+    });
+
+    describe("add()", function () {
         it("should add two vectors", function () {
             let v1 = vector.create([1, -2, 3]);
             let v2 = vector.create([2, 2, 2]);
@@ -344,13 +362,14 @@ describe("vector", function () {
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([3, 0, 5]));
         });
-        it("should add a vector and a scalar", function () {
-            let v1 = vector.create([1, -2, 3]);
+        it("should add two 2D vectors", function () {
+            let v1 = vector.create2x2(1,2,3,4);
+            let v2 = vector.create2x2(4,5,6,7);
             let r = doBoth(
-                () => vector.add(v1, 10),
-                () => v1.add(10),
-                assertVectorsBasicallyEqual);
-            assertVectorsBasicallyEqual(r, vector.create([3, 0, 5]));
+                () => vector.add(v1, v2),
+                () => v1.add(v2),
+                (v1, v2) => numberArraysEqual(v1.size(), v2.size()));
+            // assertVectorsBasicallyEqual(r, vector.create([3, 0, 5]));
         });
         it("should throw if vectors have different lengths", function () {
             let v1 = vector.create([1, -2]);
@@ -360,9 +379,28 @@ describe("vector", function () {
                 () => v1.add(v2));
             assert(r.errors.both, "Both static and member functions should have thrown.");
         });
+        it("should throw if vectors have different sizes", function () {
+            let v1 = vector.create2x2(0,0);
+            let v2 = vector.create2(0,0);
+            let r = doBoth(
+                () => vector.add(v1, v2),
+                () => v1.add(v2));
+            assert(r.errors.both, "Both static and member functions should have thrown.");
+        });
     });
 
-    describe("#sub()", function () {
+    describe("addScalar()", function(){
+        it("should add a vector and a scalar", function () {
+            let v1 = vector.create([1, -2, 3]);
+            let r = doBoth(
+                () => vector.addScalar(v1, 10),
+                () => v1.addScalar(10),
+                assertVectorsBasicallyEqual);
+            assertVectorsBasicallyEqual(r, vector.create([11, 8, 13]));
+        });
+    });
+
+    describe("sub()", function () {
         it("should subtract one vector from another", function () {
             let v1 = vector.create([1, -2, 3]);
             let v2 = vector.create([2, 2, 2]);
@@ -382,7 +420,18 @@ describe("vector", function () {
         });
     });
 
-    describe("#multiplyScalar()", function () {
+    describe("subScalar()", function(){
+        it("should subtract a scalar from a vector", function () {
+            let v1 = vector.create([1, -2, 3]);
+            let r = doBoth(
+                () => vector.subScalar(v1, 10),
+                () => v1.subScalar(10),
+                assertVectorsBasicallyEqual);
+            assertVectorsBasicallyEqual(r, vector.create([-9, -12, -7]));
+        });
+    });
+
+    describe("multiplyScalar()", function () {
         it("should multiply a vector and a scalar", function () {
             let v = vector.create([1, -2, 3]);
             let s = -10;
@@ -394,7 +443,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#divideScalar()", function () {
+    describe("divideScalar()", function () {
         it("should divide a vector by a scalar", function () {
             let v = vector.create([1, -2, 3]);
             let s = -10;
@@ -406,7 +455,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#floor()", function () {
+    describe("floor()", function () {
         it("should produce the element-wise floor function", function () {
             let v = vector.create([1.02312, -23.1239, 159.3213]);
             let s = -10;
@@ -418,7 +467,7 @@ describe("vector", function () {
         });
     });
 
-    describe("#createWithDimensions()", function () {
+    describe("createWithDimensions()", function () {
         it("should create with 2D dimensions", function () {
             let v = vector.createWithDimensions([2,3],1);
             assert.strictEqual(v.dimension, 2);
@@ -515,4 +564,14 @@ function basicallyEqual(n1, n2) {
     if (n1 === n2) return true;
     let d = Math.abs(n1 - n2);
     return d < absoluteTol;
+}
+
+function numberArraysEqual(first, second){
+    if(!Array.isArray(first)) throw new Error("first must be an array.");    
+    if(!Array.isArray(second)) throw new Error("second must be an array.");
+    if(first.length !== second.length) return false;
+    for (var i = 0; i < first.length; i++) {
+        if(first[i] !== second[i]) return false;
+    }
+    return true;
 }

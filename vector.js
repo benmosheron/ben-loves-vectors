@@ -1,9 +1,15 @@
 module.exports = {
     size: size,
+    zip: zip,
+    cascadeMap: cascadeMap,
+    cascadeReduce: cascadeReduce,
     magnitude: magnitude,
     normalise: normalise,
+    negate: negate,
     add: add,
+    addScalar: addScalar,
     sub: sub,
+    subScalar: subScalar,
     multiplyScalar: multiplyScalar,
     divideScalar: divideScalar,
     equals: equals,
@@ -19,13 +25,38 @@ module.exports = {
 
 // Get an array of the lengths of each dimension of v.
 function size(v){
-    if(!isAVector(v)) throw new Error("Input must be vector.");
+    if(!isAVector(v)) throw new Error("v must be vector.");
     return sizeRec(v, v.dimension, []);
 }
 
-// verify that all vector elements per dimension have the same length
-function verify(v){
+// Map a function over every element of a vector. Applied recursively to higher dimension vectors.
+function cascadeMap(v, f){
+    if(!isAVector(v)) throw new Error("v must be vector.");
+    return v.map(function (e) {
+        if(!isAVector(e)) return f(e);
+        return cascadeMap(e, f);
+    });
+}
 
+// Apply a function to element pairs of two vectors.
+function zip(v1, v2, f){
+    if (!arraysEqual(v1.size(), v2.size())) throw `Vector addition requires equal sizes ([${v1.size()}] != [${v2.size()}])`;
+    return v1.map(function(e1, i){
+        let e2 = v2.get(i);
+        if(!isAVector(e1)) return f(e1, e2);
+        return zip(e1, e2, f);
+    });
+}
+
+//todo: zipMany([v1,v2,...,vN], f)
+
+// Apply an accumulator over all elements of a vector.
+function cascadeReduce(v, f, init){
+    if(!isAVector(v)) "v must be a vector.";
+    return v.reduce(function(prev, next){
+        if(!isAVector(next)) return f(prev, next);
+        return cascadeReduce(next, f, prev);
+    }, init);
 }
 
 // Calculate the magnitude of a vector.
@@ -45,21 +76,32 @@ function normalise(v, s) {
     return v.multiplyScalar(s / v.magnitude());
 }
 
-// Add two vectors of the same length
+function negate(v1) {
+    if (!isAVector(v1)) throw new Error("v1 must be a vector.");
+    return v1.cascadeMap((e) => -e);
+}
+
+// Add two vectors of the same size
 function add(v1, v2) {
     if (!isAVector(v1)) throw new Error("v1 must be a vector.");
+    if (!isAVector(v2)) throw new Error("v2 must be a vector.");
+    return zip(v1,v2,(e1, e2) => e1 + e2);
+}
 
-
-    if (v1.length !== v2.length) throw `Vector addition requires equal lengths ([${v1.length}] != [${v2.length}])`;
-
-    return v1.map(function (e, i) { return e + v2.array[i]; });
+function addScalar(v1, s){
+    if(typeof s !== "number") throw new Error("s must be a number");
+    return add(v1, createWithDimensions(v1.size(), s));
 }
 
 // Subtract v2 from v1 where v2 and v1 are both vectors of the same length
 function sub(v1, v2) {
     if (v1.length !== v2.length) throw `Vector subtraction requires equal lengths ([${v1.length}] != [${v2.length}])`;
-
+//todo negate()
     return v1.map(function (e, i) { return e - v2.array[i]; });
+}
+
+function subScalar(v1, s){
+    return addScalar(v1, -s);
 }
 
 // Multiply a vector by a scalar
@@ -112,15 +154,20 @@ function create(arrayOrVector) {
         // Get an array of the lengths of each dimension
         size: function () { return size(this); },
         // Creates a new vector from wrapping the result of array.map().
-        map: function (f) { return create(this.array.map(f)) },
+        map: function (f, i) { return create(this.array.map(f, i)) },
+        zip: function(v2, f) { return zip(this, v2, f); },
         // Creates a new vector from wrapping the result of array.reduce().
         reduce: function (f, init) { return this.array.reduce(f, init) },
+        cascadeMap: function (f) { return cascadeMap(this, f); },
+        cascadeReduce: function(f, init){ return cascadeReduce(this, f, init); }, 
         // Calculate the magnitude of this vector.
         magnitude: function () { return magnitude(this); },
         // Calculate a new magnitude s vector with the same direction as this one.
         normalise: function (s) { return normalise(this, s); },
         add: function (v2) { return add(this, v2); },
+        addScalar: function (s) { return addScalar(this, s); },
         sub: function (v2) { return sub(this, v2); },
+        subScalar: function (s) { return subScalar(this, s); },
         multiplyScalar: function (s) { return multiplyScalar(this, s); },
         divideScalar: function (s) { return divideScalar(this, s); },
         equals: function (v2) { return equals(this, v2); },
@@ -197,6 +244,16 @@ function createWithDimensions(dims, val){
 }
 
 // Private functions
+
+function arraysEqual(first, second){
+    if(!Array.isArray(first)) throw new Error("first must be an array.");    
+    if(!Array.isArray(second)) throw new Error("second must be an array.");
+    if(first.length !== second.length) return false;
+    for (var i = 0; i < first.length; i++) {
+        if(first[i] !== second[i]) return false;
+    }
+    return true;
+}
 
 function getDepthRec(vector, depth){
     depth += 1;
