@@ -200,7 +200,6 @@ describe("vector", function () {
     describe("size()", function () {
         it("should get an array of the lengths of each dimension (1D)", function () {
             let v = vector.create([x, y, z]);
-            let s1 = vector.size(v);
             let s = doBoth(
                 () => vector.size(v),
                 () => v.size(),
@@ -389,7 +388,7 @@ describe("vector", function () {
             let s = -10;
             let r = doBoth(
                 () => vector.multiplyScalar(v, s),
-                () => v1.multiplyScalar(s),
+                () => v.multiplyScalar(s),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([-10, 20, -30]));
         });
@@ -401,7 +400,7 @@ describe("vector", function () {
             let s = -10;
             let r = doBoth(
                 () => vector.divideScalar(v, s),
-                () => v1.divideScalar(s),
+                () => v.divideScalar(s),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([-0.1, 0.2, -0.3]));
         });
@@ -413,7 +412,7 @@ describe("vector", function () {
             let s = -10;
             let r = doBoth(
                 () => vector.floor(v),
-                () => v1.floor(),
+                () => v.floor(),
                 assertVectorsExactlyEqual);
             assertVectorsExactlyEqual(r, vector.create([1, -24, 159]));
         });
@@ -463,7 +462,7 @@ function doBoth(staticFunction, memberFunction, assertion) {
     }
 
     try {
-        m = staticFunction();
+        m = memberFunction();
     }
     catch (ex) {
         errors.any = true;
