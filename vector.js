@@ -1,4 +1,5 @@
 module.exports = {
+    size: size,
     magnitude: magnitude,
     normalise: normalise,
     add: add,
@@ -15,6 +16,17 @@ module.exports = {
     createWithDimensions: createWithDimensions
 }
 // Public functions
+
+// Get an array of the lengths of each dimension of v.
+function size(v){
+    if(!isAVector(v)) throw new Error("Input must be vector.");
+    return sizeRec(v, v.dimension, []);
+}
+
+// verify that all vector elements per dimension have the same length
+function verify(v){
+
+}
 
 // Calculate the magnitude of a vector.
 function magnitude(v) {
@@ -95,9 +107,10 @@ function create(arrayOrVector) {
         dimension: getDepth(vectorArray),
         // Indicate that we have a vector.
         isAVector: true,
-        // Shortcuts
         // Get the vectors ith element.
         get: function (i) {return getElement(this, i); },
+        // Get an array of the lengths of each dimension
+        size: function () { return size(this); },
         // Creates a new vector from wrapping the result of array.map().
         map: function (f) { return create(this.array.map(f)) },
         // Creates a new vector from wrapping the result of array.reduce().
@@ -204,7 +217,13 @@ function getDepth(array){
     const first = array[0];
     if(!isAVector(first)) return 1
     return getDepthRec(first, 1);
- }
+}
+
+function sizeRec(v, dim, sizeArray){
+    if(dim === 0) return sizeArray;
+    sizeArray.push(v.length);
+    return sizeRec(v.get(0), dim - 1, sizeArray);
+}
 
 function getElementFromIndex(vector, i){
     if(i >= vector.length) throw new Error(`Index ${i} is out of bounds.`);

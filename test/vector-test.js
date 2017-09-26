@@ -197,6 +197,39 @@ describe("vector", function () {
         });
     });
 
+    describe("size()", function () {
+        it("should get an array of the lengths of each dimension (1D)", function () {
+            let v = vector.create([x, y, z]);
+            let s1 = vector.size(v);
+            let s = doBoth(
+                () => vector.size(v),
+                () => v.size(),
+                () => null);
+            assert.deepEqual(s, [3]);
+        });
+        it("should get an array of the lengths of each dimension (2D)", function () {
+            let v = vector.create([[x, y, z],[1, 2, 3]]);
+            let s = doBoth(
+                () => vector.size(v),
+                () => v.size());
+            assert.deepEqual(s, [2,3]);
+        });
+        it("should get an array of the lengths of each dimension (2D)", function () {
+            let v = vector.create([[[x, y, z],[1, 2, 3]],[[4, 5, 6],[7, 8, 9]]]);
+            let s = doBoth(
+                () => vector.size(v),
+                () => v.size());
+            assert.deepEqual(s, [2,2,3]);
+        });
+        it("should get an array of the lengths of each dimension (3D)", function () {
+            let v = vector.create([x, y, z]);
+            let s = doBoth(
+                () => vector.size(v),
+                () => v.size());
+            assert.deepEqual(s, [3]);
+        });
+    });
+
     describe("v.map()", function () {
         it("should provide an analogue to Array.map()", function () {
             let v = vector.create([x, y, z]);
