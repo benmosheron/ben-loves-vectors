@@ -13,6 +13,7 @@ module.exports = {
     subScalar: subScalar,
     multiplyScalar: multiplyScalar,
     multiplyElementWise: multiplyElementWise,
+    matrixMultiply: matrixMultiply,
     divideScalar: divideScalar,
     equals: equals,
     isAVector: isAVector,
@@ -124,6 +125,18 @@ function multiplyElementWise(v1, v2) {
     return zip(v1, v2, (e1, e2) => e1 * e2);
 }
 
+function matrixMultiply(v1, v2) {
+    // 3 things we want be able to do here:
+    // row * column
+    //   i.e.     n * [n,1] 
+    //   or   [1,n] * [n,1]
+    // 2D * column
+    //   i.e. [n,n] * [n,1]
+    // 2D * 2D
+    //   i.e. [n,n] * [n,n]
+    // We won't worry about D>2 for now.
+}
+
 // Divide a vector by a scalar
 function divideScalar(v, s) {
     return v.map(e => e / s);
@@ -187,6 +200,7 @@ function create(arrayOrVector) {
         subScalar: function (s) { return subScalar(this, s); },
         multiplyScalar: function (s) { return multiplyScalar(this, s); },
         multiplyElementWise: function (v2) { return multiplyElementWise(this, v2); },
+        matrixMultiply: function (v2) { return matrixMultiply(this, v2); },
         divideScalar: function (s) { return divideScalar(this, s); },
         equals: function (v2) { return equals(this, v2); },
         floor: function () { return floor(this); },

@@ -528,6 +528,88 @@ describe("vector", function () {
         });
     });
 
+    describe("multiplyElementWise()", function () {
+        it("should multiply n * [n,1]", function () {
+            let v1 = vector.create([1,2,3]);
+            let v2 = vector.create([[4],[5],[6]]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2));
+            let expected = (1*4)+(2*5)+(3*6);
+            assert.strictEqual(r, expected);
+        });
+        it("should multiply [n,1] * n", function () {
+            let v1 = vector.create([[1],[2],[3]]);
+            let v2 = vector.create([4,5,6]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2),
+            assertVectorsExactlyEqual);
+            let expected = vector.create(
+                [[(1*4)+(1*5)+(1*6)],
+                 [(2*4)+(2*5)+(2*6)],
+                 [(3*4)+(3*4)+(3*6)]])
+            assertVectorsExactlyEqual(r, expected);
+        });
+        it("should multiply [1,n] * [n,1]", function () {
+            let v1 = vector.create([[1,2,3]]);
+            let v2 = vector.create([[4],[5],[6]]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2));
+            let expected = (1*4)+(2*5)+(3*6);
+            assert.strictEqual(r, expected);
+        });
+        it("should multiply [n,1] * [1,n]", function () {
+            let v1 = vector.create([[1],[2],[3]]);
+            let v2 = vector.create([[4,5,6]]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2),
+            assertVectorsExactlyEqual);
+            let expected = vector.create(
+                [[(1*4)+(1*5)+(1*6)],
+                 [(2*4)+(2*5)+(2*6)],
+                 [(3*4)+(3*4)+(3*6)]])
+            assertVectorsExactlyEqual(r, expected);
+        });
+        it("should multiply [n*n] * [n,1]", function () {
+            let v1 = vector.create(
+                [[1,2,3],
+                 [4,5,6],
+                 [7,8,9]]);
+            let v2 = vector.create([[4],[5],[6]]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2),
+            assertVectorsExactlyEqual);
+            let expected = vector.create(
+                [[(1*4)+(2*5)+(3*6)],
+                 [(4*4)+(5*5)+(6*6)],
+                 [(7*4)+(8*4)+(9*6)]])
+            assertVectorsExactlyEqual(r, expected);
+        });
+        it("should multiply [n*n] * [n,n]", function () {
+            let v1 = vector.create(
+                [[1,2,3],
+                 [4,5,6],
+                 [7,8,9]]);
+            let v2 = vector.create(
+                [[11,12,13],
+                 [14,15,16],
+                 [17,18,19]]);
+            let r = doBoth(
+                () => vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2),
+            assertVectorsExactlyEqual);
+            let expected = vector.create(
+                [[(1*11)+(2*14)+(3*17),(1*12)+(2*15)+(3*18),(1*13)+(2*16)+(3*19)],
+                 [(4*11)+(5*14)+(6*17),(4*12)+(5*15)+(6*18),(4*13)+(5*16)+(6*19)]
+                 [(7*11)+(8*14)+(9*17),(7*12)+(8*15)+(9*18),(7*13)+(8*16)+(9*19)]])
+            assertVectorsExactlyEqual(r, expected);
+        });
+    });
+
     describe("divideScalar()", function () {
         it("should divide a vector by a scalar", function () {
             let v = vector.create([1, -2, 3]);
