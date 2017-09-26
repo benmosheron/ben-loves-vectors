@@ -455,6 +455,65 @@ describe("vector", function () {
         });
     });
 
+    describe("equals()", function () {
+        it("should return true for equal 1D vectors", function () {
+            let v1 = vector.create([1,2,3,4]);
+            let v2 = vector.create([1,2,3,4]);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, true);
+        });
+        it("should return true for equal 2D vectors", function () {
+            let v1 = vector.create2x2(1,2,3,4);
+            let v2 = vector.create2x2(1,2,3,4);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, true);
+        });
+        it("should return true for equal 3D vectors", function () {
+            let v1 = vector.create([[[1,2],[3,4]],[[5,6],[7,8]],[[9,0],[1,2]]]);
+            let v2 = vector.create([[[1,2],[3,4]],[[5,6],[7,8]],[[9,0],[1,2]]]);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, true);
+        });
+        it("should return false for equal 1D vectors", function () {
+            let v1 = vector.create([1,2,3,9]);
+            let v2 = vector.create([1,2,3,4]);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, false);
+        });
+        it("should return false for equal 2D vectors", function () {
+            let v1 = vector.create2x2(1,7,3,4);
+            let v2 = vector.create2x2(1,2,3,4);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, false);
+        });
+        it("should return false for equal 3D vectors", function () {
+            let v1 = vector.create([[[1,2],[3,4]],[[10,6],[7,8]],[[9,0],[1,2]]]);
+            let v2 = vector.create([[[1,2],[3,4]],[[5,6],[7,8]],[[9,0],[1,2]]]);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, false);
+        });
+        it("should return false for different size vectors", function () {
+            let v1 = vector.create([[[1,2],[3,4]],[[10,6],[7,8]],[[9,0],[1,2]]]);
+            let v2 = vector.create2x2(1,2,3,4);
+            let r = doBoth(
+                () => vector.equals(v1, v2),
+                () => v1.equals(v2));
+            assert.strictEqual(r, false);
+        });
+    });
+
     describe("floor()", function () {
         it("should produce the element-wise floor function", function () {
             let v = vector.create([1.02312, -23.1239, 159.3213]);

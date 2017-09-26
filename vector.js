@@ -116,8 +116,8 @@ function divideScalar(v, s) {
 
 // True if the v1 and v2 represent the same vectors (do not need to be the same instance).
 function equals(v1, v2) {
-    if (v1.length !== v2.length) return false;
-    return v1.reduce((acc, val, i) => acc && (v1.array[i] === v2.array[i]), true);
+    if (!arraysEqual(v1.size(), v2.size())) return false;
+    return cascadeReduce(zip(v1, v2, (e1, e2) => e1 === e2), (prev, next) => prev && next, true);
 }
 
 function isAVector(v){
