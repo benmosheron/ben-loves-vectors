@@ -5,12 +5,14 @@ module.exports = {
     cascadeReduce: cascadeReduce,
     magnitude: magnitude,
     normalise: normalise,
+    transpose: transpose,
     negate: negate,
     add: add,
     addScalar: addScalar,
     sub: sub,
     subScalar: subScalar,
     multiplyScalar: multiplyScalar,
+    multiplyElementWise: multiplyElementWise,
     divideScalar: divideScalar,
     equals: equals,
     isAVector: isAVector,
@@ -76,6 +78,20 @@ function normalise(v, s) {
     return v.multiplyScalar(s / v.magnitude());
 }
 
+function transpose(v) {
+    // If vector is 1D, we can wrap it in an empty vector to create vector with size [1,2]
+    if(v.dimension === 1) v = create([v.array]);
+    if(v.dimension > 2) throw new Error(`transpose is not implemented for dimension > 2.`);
+    let temp = [];
+    for (var j = 0; j < v.size()[1]; j++) {
+        temp.push([]);
+        for (var i = 0; i < v.size()[0]; i++) {
+            temp[j][i] = v.get([i,j]);
+        }
+    }
+    return create(temp);
+}
+
 function negate(v1) { return v1.cascadeMap((e) => -e); }
 
 // Add two vectors of the same size
@@ -102,6 +118,10 @@ function subScalar(v1, s){
 // Multiply a vector by a scalar
 function multiplyScalar(v, s) {
     return v.map(e => e * s);
+}
+
+function multiplyElementWise(v1, v2) {
+    return zip(v1, v2, (e1, e2) => e1 * e2);
 }
 
 // Divide a vector by a scalar
@@ -159,12 +179,14 @@ function create(arrayOrVector) {
         magnitude: function () { return magnitude(this); },
         // Calculate a new magnitude s vector with the same direction as this one.
         normalise: function (s) { return normalise(this, s); },
+        transpose: function () { return transpose(this); },
         negate: function () { return negate(this); },
         add: function (v2) { return add(this, v2); },
         addScalar: function (s) { return addScalar(this, s); },
         sub: function (v2) { return sub(this, v2); },
         subScalar: function (s) { return subScalar(this, s); },
         multiplyScalar: function (s) { return multiplyScalar(this, s); },
+        multiplyElementWise: function (v2) { return multiplyElementWise(this, v2); },
         divideScalar: function (s) { return divideScalar(this, s); },
         equals: function (v2) { return equals(this, v2); },
         floor: function () { return floor(this); },

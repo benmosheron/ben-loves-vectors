@@ -358,6 +358,35 @@ describe("vector", function () {
         });
     });
 
+    describe("transpose()", function () {
+        it("should transpose a 1D vector to a kinda-2D vector", function() {
+            let v = vector.create([1, 2, 3]);
+            let n = doBoth(
+                () => vector.transpose(v),
+                () => v.transpose(),
+                assertVectorsExactlyEqual);
+            let expected = vector.create([[1],[2],[3]]);
+            assertVectorsExactlyEqual(n, expected);
+        });
+        it("should transpose a 2D vector", function () {
+            let v = vector.create([[1, 2, 3],[1, 2, 3],[1, 2, 3]]);
+            let n = doBoth(
+                () => vector.transpose(v),
+                () => v.transpose(),
+                assertVectorsExactlyEqual);
+            let expected = vector.create([[1,1,1],[2,2,2],[3,3,3]]);
+            assertVectorsExactlyEqual(n, expected);
+        });
+        it("should throw for dimension > 2", function () {
+            let v = vector.createWithDimensions([2,2,2], 0);
+            let n = doBoth(
+                () => vector.transpose(v),
+                () => v.transpose(),
+                () => null);
+            assert.equal(n.errors.both, true);
+        });
+    });
+
     describe("negate()", function () {
         it("should negate a 1D vector", function () {
             let v = vector.create([1, -2, 3]);
@@ -484,6 +513,18 @@ describe("vector", function () {
                 () => v.multiplyScalar(s),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([-10, 20, -30]));
+        });
+    });
+
+    describe("multiplyElementWise()", function () {
+        it("should multiply two vectors element-wise", function () {
+            let v1 = vector.create2x2(1,2,3,4);
+            let v2 = vector.create2x2(1,2,10,20);
+            let r = doBoth(
+                () => vector.multiplyElementWise(v1, v2),
+                () => v1.multiplyElementWise(v2),
+                assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, vector.create2x2(1,4,30,80));
         });
     });
 
@@ -627,7 +668,7 @@ function doBoth(staticFunction, memberFunction, assertion) {
         assertion(s, m);
     }
 
-    if (errors.any) {
+    if (errors.any) {    
         errors.both = errors.static && errors.member;
         return {errors: errors};
     }
