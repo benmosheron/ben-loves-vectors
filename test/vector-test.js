@@ -425,6 +425,14 @@ describe("vector", function () {
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([11, 8, 13]));
         });
+        it("should add a 3D vector and a scalar", function () {
+            let v1 = vector.createWithDimensions([3, 3, 3], 7);
+            let r = doBoth(
+                () => vector.addScalar(v1, 10),
+                () => v1.addScalar(10),
+                assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, vector.createWithDimensions([3, 3, 3], 17));
+        });
     });
 
     describe("sub()", function () {
@@ -436,6 +444,15 @@ describe("vector", function () {
                 () => v1.sub(v2),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, vector.create([-1, -4, 1]));
+        });
+        it("should subtract one big vector from another", function () {
+            let v1 = vector.createWithDimensions([2, 3, 3],10);
+            let v2 = vector.createWithDimensions([2, 3, 3],3);
+            let r = doBoth(
+                () => vector.sub(v1, v2),
+                () => v1.sub(v2),
+                assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, vector.createWithDimensions([2, 3, 3],7));
         });
         it("should throw if vectors have different lengths", function () {
             let v1 = vector.create([1, -2]);
@@ -637,11 +654,7 @@ function assertVectorsExactlyEqual(v1, v2) {
     isAVector(v1);
     isAVector(v2);
     assert.strictEqual(v1.length, v2.length, "Vectors have different lengths.")
-    for (var i = 0; i < v1.length; i++) {
-        assert(
-            vector.equals(v1,v2),
-            `Vector arrays differ at element [${i}]. v1: [${v1.array[i]}]. v2: [${v2.array[i]}].`);
-    }
+    assert.equal(vector.equals(v1,v2), true, `Vectors are not equal:\r\n${v1}\r\n${v2}`);
 }
 
 function basicallyEqual(n1, n2) {

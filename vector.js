@@ -92,9 +92,7 @@ function addScalar(v1, s){
 
 // Subtract v2 from v1 where v2 and v1 are both vectors of the same length
 function sub(v1, v2) {
-    if (v1.length !== v2.length) throw `Vector subtraction requires equal lengths ([${v1.length}] != [${v2.length}])`;
-//todo negate()
-    return v1.map(function (e, i) { return e - v2.array[i]; });
+    return(add(v1, v2.negate()));
 }
 
 function subScalar(v1, s){
@@ -169,7 +167,8 @@ function create(arrayOrVector) {
         multiplyScalar: function (s) { return multiplyScalar(this, s); },
         divideScalar: function (s) { return divideScalar(this, s); },
         equals: function (v2) { return equals(this, v2); },
-        floor: function () { return floor(this); }
+        floor: function () { return floor(this); },
+        toString: function () { return getStringRec(this); }
     };
 
     // xyz shortcuts
@@ -228,6 +227,8 @@ function createRandom(n, min, max) {
     }
     return create(array);
 }
+
+// todo createWithGenerator(dims, (i,j,...) => someValue)
 
 // Create a vector with dimensions dims, and all values val.
 function createWithDimensions(dims, val){
@@ -305,6 +306,12 @@ function getElement(vector, i){
     // Use the single index
     return getElementFromIndex(vector, i);
  }
+
+function getStringRec(v1){
+    let bracket = (s) => `[${s}]`;
+    if(!isAVector(v1.get(0))) return bracket(v1.array.join());
+    return bracket(v1.map(getStringRec).array.join());
+}
 
 function undef(obj){
     return typeof obj === "undefined";
