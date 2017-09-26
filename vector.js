@@ -76,10 +76,7 @@ function normalise(v, s) {
     return v.multiplyScalar(s / v.magnitude());
 }
 
-function negate(v1) {
-    if (!isAVector(v1)) throw new Error("v1 must be a vector.");
-    return v1.cascadeMap((e) => -e);
-}
+function negate(v1) { return v1.cascadeMap((e) => -e); }
 
 // Add two vectors of the same size
 function add(v1, v2) {
@@ -164,6 +161,7 @@ function create(arrayOrVector) {
         magnitude: function () { return magnitude(this); },
         // Calculate a new magnitude s vector with the same direction as this one.
         normalise: function (s) { return normalise(this, s); },
+        negate: function () { return negate(this); },
         add: function (v2) { return add(this, v2); },
         addScalar: function (s) { return addScalar(this, s); },
         sub: function (v2) { return sub(this, v2); },

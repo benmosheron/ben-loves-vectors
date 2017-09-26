@@ -243,7 +243,13 @@ describe("vector", function () {
 
     describe("cascadeMap()", function () {
         it("should map a function onto each element", function () {
-            assert.fail();
+            let v = vector.create([[[1,2],[3,4]],[[5,6],[7,8]]]);
+            let triple = (x) => x*3;
+            let s = doBoth(
+                () => vector.cascadeMap(v, triple),
+                () => v.cascadeMap(triple),
+                assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(s, vector.create([[[3,6],[9,12]],[[15,18],[21,24]]]));
         });
     });
 
@@ -256,8 +262,14 @@ describe("vector", function () {
     });
 
     describe("cascadeReduce()", function () {
-        it("should reduce a vector to a single element", function () {
-            assert.fail();
+        it("should reduce a 3D vector to a single element", function () {
+            let v = vector.create([[[1,2],[3,4]],[[5,6],[7,8]]]);
+            let accumulator = (prev, next) => prev + next;
+            let s = doBoth(
+                () => vector.cascadeReduce(v, accumulator, 100),
+                () => v.cascadeReduce(accumulator, 100),
+                assert.strictEqual);
+            assert.strictEqual(s, 100+1+2+3+4+5+6+7+8);
         });
     });
 
@@ -347,8 +359,23 @@ describe("vector", function () {
     });
 
     describe("negate()", function () {
-        it("should negate a vector", function () {
-            assert.fail();
+        it("should negate a 1D vector", function () {
+            let v = vector.create([1, -2, 3]);
+            let n = doBoth(
+                () => vector.negate(v),
+                () => v.negate(),
+                assertVectorsExactlyEqual);
+            let expected = vector.create([-1,2,-3]);
+            assertVectorsExactlyEqual(n, expected);
+        });
+        it("should negate a 2D vector", function () {
+            let v = vector.create2x2(-3,-2,1,3);
+            let n = doBoth(
+                () => vector.negate(v),
+                () => v.negate(),
+                assertVectorsExactlyEqual);
+            let expected = vector.create2x2(3,2,-1,-3);
+            assertVectorsExactlyEqual(n, expected);
         });
     });
 
@@ -612,7 +639,7 @@ function assertVectorsExactlyEqual(v1, v2) {
     assert.strictEqual(v1.length, v2.length, "Vectors have different lengths.")
     for (var i = 0; i < v1.length; i++) {
         assert(
-            v1.array[i] === v2.array[i],
+            vector.equals(v1,v2),
             `Vector arrays differ at element [${i}]. v1: [${v1.array[i]}]. v2: [${v2.array[i]}].`);
     }
 }
