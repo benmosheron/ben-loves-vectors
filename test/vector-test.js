@@ -528,7 +528,7 @@ describe("vector", function () {
         });
     });
 
-    describe("multiplyElementWise()", function () {
+    describe("matrixMultiply()", function () {
         it("should multiply n * [n,1]", function () {
             let v1 = vector.create([1,2,3]);
             let v2 = vector.create([[4],[5],[6]]);
@@ -568,9 +568,9 @@ describe("vector", function () {
                 () => v1.matrixMultiply(v2),
             assertVectorsExactlyEqual);
             let expected = vector.create(
-                [[(1*4)+(1*5)+(1*6)],
-                 [(2*4)+(2*5)+(2*6)],
-                 [(3*4)+(3*4)+(3*6)]])
+                [[(1*4),(1*5),(1*6)],
+                 [(2*4),(2*5),(2*6)],
+                 [(3*4),(3*4),(3*6)]])
             assertVectorsExactlyEqual(r, expected);
         });
         it("should multiply [n*n] * [n,1]", function () {

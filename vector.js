@@ -126,15 +126,15 @@ function multiplyElementWise(v1, v2) {
 }
 
 function matrixMultiply(v1, v2) {
-    // 3 things we want be able to do here:
-    // row * column
-    //   i.e.     n * [n,1] 
-    //   or   [1,n] * [n,1]
-    // 2D * column
-    //   i.e. [n,n] * [n,1]
-    // 2D * 2D
-    //   i.e. [n,n] * [n,n]
-    // We won't worry about D>2 for now.
+    // If either v1 or v2 is a 1D vector, make them 2D
+    let to2D = (v) => v.dimension === 1 ? v.create([v.array]) : v;
+    v1 = to2D(v1);
+    v2 = to2D(v2);
+    if(v1.dimension !== 2 || v1.dimension !== 2) throw new Error("Vectors must be 1D or 2D");
+    let s1 = v1.size();
+    let s2 = v2.size();
+    checkMatrixMultiplyDimensions(s1,s2);
+
 }
 
 // Divide a vector by a scalar
@@ -341,7 +341,30 @@ function getElement(vector, i){
     }
     // Use the single index
     return getElementFromIndex(vector, i);
- }
+}
+
+function checkMatrixMultiplyDimensions(s1, s2){
+    //           a b     c d
+    // 1D*T(1D) [n,1] * [1,n] => [n,n] 
+    // T(1D)*1D [1,n] * [n,1] => scalar
+    // 2D*T(1D)
+    //          [n,n] * [n,1] => [n,1]
+    // 2D*2D
+    //          [n,n] * [n,n] => [n,n]
+    // We won't worry about D>2 for now.
+    //
+    // valid conditions
+    //a=b=c=d=n
+    //a=b=c=n, d=1
+    //b=c=n, a=d=1
+    //a=d=n, b=c=1
+    let a = s1[0];let b = s1[1];let c = s2[0];let d = s2[1];
+    // Fail if a != d (unless d is 1 and a = b) or b != c
+    if(b !== c) throw new Error(`Matrix size mismatch: ${s1} * ${s2}`);
+    if(a !== d){
+        if(a !== b || d !== 1) throw new Error(`Matrix size mismatch: ${s1} * ${s2}`);
+    }
+}
 
 function getStringRec(v1){
     let bracket = (s) => `[${s}]`;
