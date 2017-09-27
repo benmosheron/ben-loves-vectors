@@ -127,14 +127,34 @@ function multiplyElementWise(v1, v2) {
 
 function matrixMultiply(v1, v2) {
     // If either v1 or v2 is a 1D vector, make them 2D
-    let to2D = (v) => v.dimension === 1 ? v.create([v.array]) : v;
+    let to2D = (v) => v.dimension === 1 ? create([v.array]) : v;
     v1 = to2D(v1);
     v2 = to2D(v2);
     if(v1.dimension !== 2 || v1.dimension !== 2) throw new Error("Vectors must be 1D or 2D");
     let s1 = v1.size();
     let s2 = v2.size();
     checkMatrixMultiplyDimensions(s1,s2);
-
+    // We will use the transpose of v2 to make the calculations easier
+    let v2t = v2.transpose();
+    let temp = [];
+    // i will iterate over the rows of v1
+    // j will iterate over the cols of v2
+    for (var i = 0; i < s1[0]; i++) {
+        temp.push([]);
+        for (var j = 0; j < s2[1]; j++) {
+            // total up elements temp[i,j]
+            // zip the elems of the row from v1 with the col from v2
+            let row = v1.get(i);
+            let col = v2t.get(j);
+            temp[i][j] = row
+                            .zip(col, (e1, e2) => e1*e2)
+                            .reduce((prev, next) => prev + next, 0);
+        }
+    }
+    // collapse dimensions if we have [[n]]
+    let result = create(temp);
+    if(arraysEqual(result.size(), [1,1])) return temp[0][0];
+    return result;
 }
 
 // Divide a vector by a scalar
