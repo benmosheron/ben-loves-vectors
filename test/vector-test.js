@@ -586,7 +586,7 @@ describe("vector", function () {
             let expected = vector.create(
                 [[(1*4)+(2*5)+(3*6)],
                  [(4*4)+(5*5)+(6*6)],
-                 [(7*4)+(8*5)+(9*6)]])
+                 [(7*4)+(8*5)+(9*6)]]);
             assertVectorsExactlyEqual(r, expected);
         });
         it("should multiply [n,n] * [n,n]", function () {

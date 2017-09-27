@@ -1,6 +1,6 @@
 {
   "name": "ben-loves-vectors",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A vector package for vectors and matrices of arbitrary size.",
   "main": "vector.js",
   "directories": {
