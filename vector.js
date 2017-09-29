@@ -1,29 +1,5 @@
-module.exports = {
-    size: size,
-    zip: zip,
-    cascadeMap: cascadeMap,
-    cascadeReduce: cascadeReduce,
-    magnitude: magnitude,
-    normalise: normalise,
-    transpose: transpose,
-    negate: negate,
-    add: add,
-    addScalar: addScalar,
-    sub: sub,
-    subScalar: subScalar,
-    multiplyScalar: multiplyScalar,
-    multiplyElementWise: multiplyElementWise,
-    matrixMultiply: matrixMultiply,
-    divideScalar: divideScalar,
-    equals: equals,
-    isAVector: isAVector,
-    floor: floor,
-    create: create,
-    create2: create2,
-    create2x2: create2x2,
-    createRandom: createRandom,
-    createWithDimensions: createWithDimensions
-}
+(function () {
+
 // Public functions
 
 // Get an array of the lengths of each dimension of v.
@@ -395,3 +371,39 @@ function getStringRec(v1){
 function undef(obj){
     return typeof obj === "undefined";
 }
+
+if(typeof module === "undefined") module = {};
+
+module.exports = {
+    size: size,
+    zip: zip,
+    cascadeMap: cascadeMap,
+    cascadeReduce: cascadeReduce,
+    magnitude: magnitude,
+    normalise: normalise,
+    transpose: transpose,
+    negate: negate,
+    add: add,
+    addScalar: addScalar,
+    sub: sub,
+    subScalar: subScalar,
+    multiplyScalar: multiplyScalar,
+    multiplyElementWise: multiplyElementWise,
+    matrixMultiply: matrixMultiply,
+    divideScalar: divideScalar,
+    equals: equals,
+    isAVector: isAVector,
+    floor: floor,
+    create: create,
+    create2: create2,
+    create2x2: create2x2,
+    createRandom: createRandom,
+    createWithDimensions: createWithDimensions
+}
+
+try {
+    // Assign the global variable "vector" in the browser.
+    window.vector = module.exports;
+} catch (e) {}
+
+})();
