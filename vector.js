@@ -28,7 +28,13 @@ function Vector(arrayOrVector){
 // zipMany([v1,v2,...,vN], f)
 // collapse(v1): collapse a vector to 1d if all other dimensions are 1 (e.g. size [1,1,3,1] => [3])
 // invert(v1)
+// eye()
+// diagonal()
+// shortcut functions for matrixMultiply, elemwise stuff.
+
 // todo: move these to the Vector declarations below
+// This is now officially the messiest code base ever D:
+// Also consider swapping static/prototype calls to make the static call the prototype.
 
 // Calculate the magnitude of a vector.
 function magnitude(v) {
