@@ -1,4 +1,6 @@
 (function () {
+if(typeof module === "undefined") module = {};
+"use strict";
 
 // Constructor
 function Vector(arrayOrVector){
@@ -377,8 +379,6 @@ Vector.floor = floor;
 Vector.prototype.floor = function () { return Vector.floor(this); };
 Vector.toString = function (v) { return getStringRec(v); };
 Vector.prototype.toString = function(){ return Vector.toString(this); };
-
-if(typeof module === "undefined") module = {};
 
 module.exports = Vector;
 
