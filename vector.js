@@ -390,7 +390,7 @@ module.exports = Vector;
 
 try {
     // Assign the global variable "vector" in the browser.
-    window.vector = module.exports;
+    window.Vector = module.exports;
 } catch (e) {}
 
 })();
