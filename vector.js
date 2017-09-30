@@ -1,7 +1,6 @@
 (function () {
 
-// Public functions
-
+// Constructor
 function Vector(arrayOrVector){
     const array = isAVector(arrayOrVector) ? arrayOrVector.array : arrayOrVector;
     if (!Array.isArray(array)) throw new Error(`Input must be an array. [${array}] is not an array.`);
@@ -18,12 +17,16 @@ function Vector(arrayOrVector){
     // Indicate that we have a vector.
     this.isAVector = true;
     // z, y & z shortcuts
-    if(vectorArray.length > 0) this.x = vectorArray[0];
-    if(vectorArray.length > 1) this.y = vectorArray[1];
-    if(vectorArray.length > 2) this.z = vectorArray[2];
+    if(vectorArray.length > 0 && !isAVector(vectorArray[0])) this.x = vectorArray[0];
+    if(vectorArray.length > 1 && !isAVector(vectorArray[1])) this.y = vectorArray[1];
+    if(vectorArray.length > 2 && !isAVector(vectorArray[2])) this.z = vectorArray[2];
 }
 
-//todo: zipMany([v1,v2,...,vN], f)
+//feature requests: 
+// zipMany([v1,v2,...,vN], f)
+// collapse(v1): collapse a vector to 1d if all other dimensions are 1 (e.g. size [1,1,3,1] => [3])
+// invert(v1)
+// todo: move these to the Vector declarations below
 
 // Calculate the magnitude of a vector.
 function magnitude(v) {
@@ -139,71 +142,6 @@ function isAVector(v){
 
 function floor(v) {
     return v.map(e => Math.floor(e));
-}
-
-// Create a vector from an array of values, or another vector.
-function create(arrayOrVector) {
-    const array = isAVector(arrayOrVector) ? arrayOrVector.array : arrayOrVector;
-    if (!Array.isArray(array)) throw new Error(`Input must be an array. [${array}] is not an array.`);
-    if(arguments.length > 1) throw new Error("More than one argument provided to create.");
-
-    // For dimension > 1, we convert each sub array to a vector.
-    const vectorArray = array.map(e => Array.isArray(e) ? new Vector(e) : e);
-
-    // The object we will be returning
-    let vector = {
-        // This vector's number array.
-        array: vectorArray,
-        // Length of this vector's array.
-        length: vectorArray.length,
-        // The dimension of this vector.
-        dimension: getDepth(vectorArray),
-        // Indicate that we have a vector.
-        isAVector: true,
-        // Get the vectors ith element.
-        get: function (i) {return getElement(this, i); },
-        // Get an array of the lengths of each dimension
-        size: function () { return size(this); },
-        // Creates a new vector from wrapping the result of array.map().
-        map: function (f, i) { return new Vector(this.array.map(f, i)) },
-        zip: function(v2, f) { return zip(this, v2, f); },
-        // Creates a new vector from wrapping the result of array.reduce().
-        reduce: function (f, init) { return this.array.reduce(f, init) },
-        cascadeMap: function (f) { return cascadeMap(this, f); },
-        cascadeReduce: function(f, init){ return cascadeReduce(this, f, init); }, 
-        // Calculate the magnitude of this vector.
-        magnitude: function () { return magnitude(this); },
-        // Calculate a new magnitude s vector with the same direction as this one.
-        normalise: function (s) { return normalise(this, s); },
-        transpose: function () { return transpose(this); },
-        negate: function () { return negate(this); },
-        add: function (v2) { return add(this, v2); },
-        addScalar: function (s) { return addScalar(this, s); },
-        sub: function (v2) { return sub(this, v2); },
-        subScalar: function (s) { return subScalar(this, s); },
-        multiplyScalar: function (s) { return multiplyScalar(this, s); },
-        multiplyElementWise: function (v2) { return multiplyElementWise(this, v2); },
-        matrixMultiply: function (v2) { return matrixMultiply(this, v2); },
-        divideScalar: function (s) { return divideScalar(this, s); },
-        equals: function (v2) { return equals(this, v2); },
-        floor: function () { return floor(this); },
-        toString: function () { return getStringRec(this); }
-    };
-
-    // xyz shortcuts
-    if (vector.length > 0) {
-        vector.x = vector.array[0];
-    }
-
-    if (vector.length > 1) {
-        vector.y = vector.array[1];
-    }
-
-    if (vector.length > 2) {
-        vector.z = vector.array[2];
-    }
-
-    return vector;
 }
 
 // Create a vector of length two, providing x and (optionally) y values.
