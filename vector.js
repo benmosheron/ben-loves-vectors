@@ -2,41 +2,28 @@
 
 // Public functions
 
-// Get an array of the lengths of each dimension of v.
-function size(v){
-    if(!isAVector(v)) throw new Error("v must be vector.");
-    return sizeRec(v, v.dimension, []);
-}
+function Vector(arrayOrVector){
+    const array = isAVector(arrayOrVector) ? arrayOrVector.array : arrayOrVector;
+    if (!Array.isArray(array)) throw new Error(`Input must be an array. [${array}] is not an array.`);
+    if(arguments.length > 1) throw new Error("More than one argument provided to create.");
 
-// Map a function over every element of a vector. Applied recursively to higher dimension vectors.
-function cascadeMap(v, f){
-    if(!isAVector(v)) throw new Error("v must be vector.");
-    return v.map(function (e) {
-        if(!isAVector(e)) return f(e);
-        return cascadeMap(e, f);
-    });
-}
-
-// Apply a function to element pairs of two vectors.
-function zip(v1, v2, f){
-    if (!arraysEqual(v1.size(), v2.size())) throw `Vector addition requires equal sizes ([${v1.size()}] != [${v2.size()}])`;
-    return v1.map(function(e1, i){
-        let e2 = v2.get(i);
-        if(!isAVector(e1)) return f(e1, e2);
-        return zip(e1, e2, f);
-    });
+    // For dimension > 1, we convert each sub array to a vector.
+    const vectorArray = array.map(e => Array.isArray(e) ? new Vector(e) : e);
+    // This vector's number array.
+    this.array = vectorArray;
+    // Length of this vector's array.
+    this.length = vectorArray.length;
+    // The dimension of this vector.
+    this.dimension = getDepth(vectorArray);
+    // Indicate that we have a vector.
+    this.isAVector = true;
+    // z, y & z shortcuts
+    if(vectorArray.length > 0) this.x = vectorArray[0];
+    if(vectorArray.length > 1) this.y = vectorArray[1];
+    if(vectorArray.length > 2) this.z = vectorArray[2];
 }
 
 //todo: zipMany([v1,v2,...,vN], f)
-
-// Apply an accumulator over all elements of a vector.
-function cascadeReduce(v, f, init){
-    if(!isAVector(v)) "v must be a vector.";
-    return v.reduce(function(prev, next){
-        if(!isAVector(next)) return f(prev, next);
-        return cascadeReduce(next, f, prev);
-    }, init);
-}
 
 // Calculate the magnitude of a vector.
 function magnitude(v) {
@@ -57,7 +44,7 @@ function normalise(v, s) {
 
 function transpose(v) {
     // If vector is 1D, we can wrap it in an empty vector to create vector with size [1,2]
-    if(v.dimension === 1) v = create([v.array]);
+    if(v.dimension === 1) v = new Vector([v.array]);
     if(v.dimension > 2) throw new Error(`transpose is not implemented for dimension > 2.`);
     let temp = [];
     for (var j = 0; j < v.size()[1]; j++) {
@@ -66,7 +53,7 @@ function transpose(v) {
             temp[j][i] = v.get([i,j]);
         }
     }
-    return create(temp);
+    return new Vector(temp);
 }
 
 function negate(v1) { return v1.cascadeMap((e) => -e); }
@@ -75,12 +62,12 @@ function negate(v1) { return v1.cascadeMap((e) => -e); }
 function add(v1, v2) {
     if (!isAVector(v1)) throw new Error("v1 must be a vector.");
     if (!isAVector(v2)) throw new Error("v2 must be a vector.");
-    return zip(v1,v2,(e1, e2) => e1 + e2);
+    return Vector.zip(v1,v2,(e1, e2) => e1 + e2);
 }
 
 function addScalar(v1, s){
     if(typeof s !== "number") throw new Error("s must be a number");
-    return add(v1, createWithDimensions(v1.size(), s));
+    return add(v1, Vector.createWithDimensions(v1.size(), s));
 }
 
 // Subtract v2 from v1 where v2 and v1 are both vectors of the same length
@@ -98,12 +85,12 @@ function multiplyScalar(v, s) {
 }
 
 function multiplyElementWise(v1, v2) {
-    return zip(v1, v2, (e1, e2) => e1 * e2);
+    return Vector.zip(v1, v2, (e1, e2) => e1 * e2);
 }
 
 function matrixMultiply(v1, v2) {
     // If either v1 or v2 is a 1D vector, make them 2D
-    let to2D = (v) => v.dimension === 1 ? create([v.array]) : v;
+    let to2D = (v) => v.dimension === 1 ? new Vector([v.array]) : v;
     v1 = to2D(v1);
     v2 = to2D(v2);
     if(v1.dimension !== 2 || v1.dimension !== 2) throw new Error("Vectors must be 1D or 2D");
@@ -128,7 +115,7 @@ function matrixMultiply(v1, v2) {
         }
     }
     // collapse dimensions if we have [[n]]
-    let result = create(temp);
+    let result = new Vector(temp);
     if(arraysEqual(result.size(), [1,1])) return temp[0][0];
     return result;
 }
@@ -141,7 +128,7 @@ function divideScalar(v, s) {
 // True if the v1 and v2 represent the same vectors (do not need to be the same instance).
 function equals(v1, v2) {
     if (!arraysEqual(v1.size(), v2.size())) return false;
-    return cascadeReduce(zip(v1, v2, (e1, e2) => e1 === e2), (prev, next) => prev && next, true);
+    return Vector.cascadeReduce(Vector.zip(v1, v2, (e1, e2) => e1 === e2), (prev, next) => prev && next, true);
 }
 
 function isAVector(v){
@@ -161,7 +148,7 @@ function create(arrayOrVector) {
     if(arguments.length > 1) throw new Error("More than one argument provided to create.");
 
     // For dimension > 1, we convert each sub array to a vector.
-    const vectorArray = array.map(e => Array.isArray(e) ? create(e) : e);
+    const vectorArray = array.map(e => Array.isArray(e) ? new Vector(e) : e);
 
     // The object we will be returning
     let vector = {
@@ -178,7 +165,7 @@ function create(arrayOrVector) {
         // Get an array of the lengths of each dimension
         size: function () { return size(this); },
         // Creates a new vector from wrapping the result of array.map().
-        map: function (f, i) { return create(this.array.map(f, i)) },
+        map: function (f, i) { return new Vector(this.array.map(f, i)) },
         zip: function(v2, f) { return zip(this, v2, f); },
         // Creates a new vector from wrapping the result of array.reduce().
         reduce: function (f, init) { return this.array.reduce(f, init) },
@@ -223,7 +210,7 @@ function create(arrayOrVector) {
 function create2(x, y) {
     if (typeof x === "undefined") throw new Error("At least one argument must be provided.");
     if (typeof y === "undefined") y = x;
-    return create([x, y]);
+    return new Vector([x, y]);
 }
 
 // Create a 2D vector by providing one, two, or four values
@@ -247,7 +234,7 @@ function create2x2(a, b, c, d){
         }
     }
 
-    return create([[a, b],[c, d]]);
+    return new Vector([[a, b],[c, d]]);
 }
 
 // Create a uniform random n-length vector, bounded by min (inclusive) and max (exclusive).
@@ -257,7 +244,7 @@ function createRandom(n, min, max) {
     for (var i = 0; i < n; i++) {
         array[i] = (Math.random() * scale) + min;
     }
-    return create(array);
+    return new Vector(array);
 }
 
 // todo createWithGenerator(dims, (i,j,...) => someValue)
@@ -270,7 +257,7 @@ function createWithDimensions(dims, val){
     const l = dims.pop();
     const array = new Array(l).fill(val);
 
-    if(dims.length === 0) return create(array);
+    if(dims.length === 0) return new Vector(array);
     return createWithDimensions(dims, array);
 }
 
@@ -372,34 +359,90 @@ function undef(obj){
     return typeof obj === "undefined";
 }
 
+Vector.create2 =  create2;
+Vector.create2x2 =  create2x2;
+Vector.createRandom =  createRandom;
+Vector.createWithDimensions =  createWithDimensions;
+
+Vector.get = getElement;
+Vector.prototype.get = function (i) { return Vector.get(this, i); };
+// Get an array of the lengths of each dimension of v.
+Vector.size = function(v){
+    if(!isAVector(v)) throw new Error("v must be vector.");
+    return sizeRec(v, v.dimension, []);
+}
+Vector.prototype.size = function () { return Vector.size(this); };
+
+Vector.map = function (v, f, i) { return new Vector(v.array.map(f, i)) };
+Vector.prototype.map = function (f, i) { return Vector.map(this, f, i) };
+
+// Apply a function to element pairs of two vectors.
+Vector.zip = function(v1, v2, f){
+    if (!arraysEqual(v1.size(), v2.size())) throw `Vector addition requires equal sizes ([${v1.size()}] != [${v2.size()}])`;
+    return v1.map(function(e1, i){
+        let e2 = v2.get(i);
+        if(!isAVector(e1)) return f(e1, e2);
+        return Vector.zip(e1, e2, f);
+    });
+}
+Vector.prototype.zip = function(v2, f) { return Vector.zip(this, v2, f); };
+
+Vector.reduce = function (v, f, init) { return v.array.reduce(f, init) };
+Vector.prototype.reduce = function (f, init) { return Vector.reduce(this, f, init); };
+
+// Map a function over every element of a vector. Applied recursively to higher dimension vectors.
+Vector.cascadeMap = function(v, f){
+    if(!isAVector(v)) throw new Error("v must be vector.");
+    return v.map(function (e) {
+        if(!isAVector(e)) return f(e);
+        return Vector.cascadeMap(e, f);
+    });
+}
+Vector.prototype.cascadeMap = function (f) { return Vector.cascadeMap(this, f); };
+
+// Apply an accumulator over all elements of a vector.
+Vector.cascadeReduce = function(v, f, init){
+    if(!isAVector(v)) "v must be a vector.";
+    return v.reduce(function(prev, next){
+        if(!isAVector(next)) return f(prev, next);
+        return Vector.cascadeReduce(next, f, prev);
+    }, init);
+}
+Vector.prototype.cascadeReduce = function(f, init){ return Vector.cascadeReduce(this, f, init); };
+Vector.magnitude = magnitude;
+Vector.prototype.magnitude = function () { return Vector.magnitude(this); };
+Vector.normalise = normalise;
+Vector.prototype.normalise = function (s) { return Vector.normalise(this, s); };
+Vector.transpose = transpose;
+Vector.prototype.transpose = function () { return Vector.transpose(this); };
+Vector.negate = negate;
+Vector.prototype.negate = function () { return Vector.negate(this); };
+Vector.add = add;
+Vector.prototype.add = function (v2) { return Vector.add(this, v2); };
+Vector.addScalar = addScalar;
+Vector.prototype.addScalar = function (s) { return Vector.addScalar(this, s); };
+Vector.sub = sub;
+Vector.prototype.sub = function (v2) { return Vector.sub(this, v2); };
+Vector.subScalar = subScalar;
+Vector.prototype.subScalar = function (s) { return Vector.subScalar(this, s); };
+Vector.multiplyScalar = multiplyScalar;
+Vector.prototype.multiplyScalar = function (s) { return Vector.multiplyScalar(this, s); };
+Vector.multiplyElementWise = multiplyElementWise;
+Vector.prototype.multiplyElementWise = function (v2) { return Vector.multiplyElementWise(this, v2); };
+Vector.matrixMultiply = matrixMultiply;
+Vector.prototype.matrixMultiply = function (v2) { return Vector.matrixMultiply(this, v2); };
+Vector.divideScalar = divideScalar;
+Vector.prototype.divideScalar = function (s) { return Vector.divideScalar(this, s); };
+Vector.equals = equals;
+Vector.prototype.equals = function (v2) { return Vector.equals(this, v2); };
+Vector.floor = floor;
+Vector.prototype.floor = function () { return Vector.floor(this); };
+Vector.toString = function (v) { return getStringRec(v); };
+Vector.prototype.toString = function(){ return Vector.toString(this); };
+
 if(typeof module === "undefined") module = {};
 
-module.exports = {
-    size: size,
-    zip: zip,
-    cascadeMap: cascadeMap,
-    cascadeReduce: cascadeReduce,
-    magnitude: magnitude,
-    normalise: normalise,
-    transpose: transpose,
-    negate: negate,
-    add: add,
-    addScalar: addScalar,
-    sub: sub,
-    subScalar: subScalar,
-    multiplyScalar: multiplyScalar,
-    multiplyElementWise: multiplyElementWise,
-    matrixMultiply: matrixMultiply,
-    divideScalar: divideScalar,
-    equals: equals,
-    isAVector: isAVector,
-    floor: floor,
-    create: create,
-    create2: create2,
-    create2x2: create2x2,
-    createRandom: createRandom,
-    createWithDimensions: createWithDimensions
-}
+module.exports = Vector;
 
 try {
     // Assign the global variable "vector" in the browser.
