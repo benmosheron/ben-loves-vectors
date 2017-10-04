@@ -276,6 +276,20 @@ Vector.create2 =  create2;
 Vector.create2x2 =  create2x2;
 Vector.createRandom =  createRandom;
 Vector.createWithDimensions =  createWithDimensions;
+// Create an nxn vector with diagonal elements x
+Vector.diag = function (n, x){
+    let array = [];
+    for (var i = 0; i < n; i++) {
+        array.push([]);
+        for (var j = 0; j < n; j++) {
+            if(i===j) array[i].push(x);
+            else array[i].push(0);
+        }
+    }
+    return new Vector(array);
+}
+// Create an nxn identity matrix
+Vector.eye = function (n) { return Vector.diag(n, 1); }
 
 Vector.get = getElement;
 Vector.prototype.get = function (i) { return Vector.get(this, i); };

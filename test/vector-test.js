@@ -170,6 +170,41 @@ describe("vector", function () {
         })
     });
 
+    describe("Vector.eye()", function () {
+        it("should create an nxn identity matrix", function () {
+            const n = 3;
+            const v = Vector.eye(n);
+            isAVector(v);
+            assert.strictEqual(v.length, n);
+            assert.strictEqual(v.dimension, 2);
+            for (var i = 0; i < n; i++) {
+                for (var j = 0; j < n; j++) {
+                    const e = v.get([i,j]);
+                    if(i===j) assert.strictEqual(e,1);
+                    else assert.strictEqual(e,0);
+                }
+            }
+        })
+    });
+
+    describe("Vector.diag()", function () {
+        it("should create an nxn matrix with diagonal values x", function () {
+            const n = 3;
+            const x = 19
+            const v = Vector.diag(n, x);
+            isAVector(v);
+            assert.strictEqual(v.length, n);
+            assert.strictEqual(v.dimension, 2);
+            for (var i = 0; i < n; i++) {
+                for (var j = 0; j < n; j++) {
+                    const e = v.get([i,j]);
+                    if(i===j) assert.strictEqual(e,x);
+                    else assert.strictEqual(e,0);
+                }
+            }
+        })
+    });
+
     describe("get()", function () {
         it("should throw if the element is out of bounds", function(){
             assert.throws(() => new Vector([1]).get(1));
