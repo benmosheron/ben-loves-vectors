@@ -26,7 +26,6 @@ function Vector(arrayOrVector){
 
 //feature requests: 
 // zipMany([v1,v2,...,vN], f)
-// collapse(v1): collapse a vector to 1d if all other dimensions are 1 (e.g. size [1,1,3,1] => [3])
 // invert(v1)
 // eye()
 // diagonal()
@@ -36,39 +35,6 @@ function Vector(arrayOrVector){
 // todo: move these to the Vector declarations below
 // This is now officially the messiest code base ever D:
 // Also consider swapping static/prototype calls to make the static call the prototype.
-
-// Calculate the magnitude of a vector.
-function magnitude(v) {
-    if(v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
-    if (v.length === 0) {
-        return 0;
-    }
-    return Math.sqrt(v.reduce(function (t, n) { return t + (n * n); }, 0));
-}
-
-// Calculate a new magnitude s vector with the same direction as v.
-function normalise(v, s) {
-    if (v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
-    if (typeof s === "undefined") s = 1;
-    if (v.magnitude() === 0) return v.map(e => e);
-    return v.multiplyScalar(s / v.magnitude());
-}
-
-function transpose(v) {
-    // If vector is 1D, we can wrap it in an empty vector to create vector with size [1,2]
-    if(v.dimension === 1) v = new Vector([v.array]);
-    if(v.dimension > 2) throw new Error(`transpose is not implemented for dimension > 2.`);
-    let temp = [];
-    for (var j = 0; j < v.size()[1]; j++) {
-        temp.push([]);
-        for (var i = 0; i < v.size()[0]; i++) {
-            temp[j][i] = v.get([i,j]);
-        }
-    }
-    return new Vector(temp);
-}
-
-function negate(v1) { return v1.cascadeMap((e) => -e); }
 
 // Add two vectors of the same size
 function add(v1, v2) {
@@ -382,14 +348,46 @@ Vector.collapse = function(v){
 }
 Vector.prototype.collapse = function () { return Vector.collapse(this); };
 
-Vector.magnitude = magnitude;
+function transpose(v) {
+    // If vector is 1D, we can wrap it in an empty vector to create vector with size [1,2]
+    if(v.dimension === 1) v = new Vector([v.array]);
+    if(v.dimension > 2) throw new Error(`transpose is not implemented for dimension > 2.`);
+    let temp = [];
+    for (var j = 0; j < v.size()[1]; j++) {
+        temp.push([]);
+        for (var i = 0; i < v.size()[0]; i++) {
+            temp[j][i] = v.get([i,j]);
+        }
+    }
+    return new Vector(temp);
+}
+
+// Calculate the magnitude of a vector.
+Vector.magnitude = function (v) {
+    if(v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
+    if (v.length === 0) {
+        return 0;
+    }
+    return Math.sqrt(v.reduce(function (t, n) { return t + (n * n); }, 0));
+}
 Vector.prototype.magnitude = function () { return Vector.magnitude(this); };
-Vector.normalise = normalise;
+
+// Calculate a new magnitude s vector with the same direction as v.
+Vector.normalise = function (v, s) {
+    if (v.dimension > 1) throw new Error("Not implemented for dimensions > 1.");
+    if (typeof s === "undefined") s = 1;
+    if (v.magnitude() === 0) return v.map(e => e);
+    return v.multiplyScalar(s / v.magnitude());
+}
 Vector.prototype.normalise = function (s) { return Vector.normalise(this, s); };
+
+// Swap a 2D vector's rows and columns
 Vector.transpose = transpose;
 Vector.prototype.transpose = function () { return Vector.transpose(this); };
-Vector.negate = negate;
+
+Vector.negate = function (v1) { return v1.cascadeMap((e) => -e); }
 Vector.prototype.negate = function () { return Vector.negate(this); };
+
 Vector.add = add;
 Vector.prototype.add = function (v2) { return Vector.add(this, v2); };
 Vector.addScalar = addScalar;
