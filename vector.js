@@ -358,6 +358,30 @@ Vector.cascadeReduce = function(v, f, init){
 }
 Vector.prototype.cascadeReduce = function(f, init){ return Vector.cascadeReduce(this, f, init); };
 
+// Collapse a vector to 1 dimension by removing all length 1 dimensions.
+Vector.collapse = function(v){
+    if(v.size().filter(e => e > 1).length > 1) throw new Error(`Cannot collapse vector with size ${v.size()}.`);
+
+    // drill to first level with >1 value
+    function drillRec(v){
+        const next = v.get(0);
+        if(v.length > 1 || !isAVector(next)) return v;
+        return drillRec(next);
+    }
+
+    // map to elementary values
+    function mapToValues(v){
+        function mapRec(e){
+            if(!isAVector(e)) return e;
+            return mapRec(e.get(0));
+        }
+        return v.map(mapRec);
+    }
+
+    return mapToValues(drillRec(v));
+}
+Vector.prototype.collapse = function () { return Vector.collapse(this); };
+
 Vector.magnitude = magnitude;
 Vector.prototype.magnitude = function () { return Vector.magnitude(this); };
 Vector.normalise = normalise;

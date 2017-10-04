@@ -739,6 +739,39 @@ describe("vector", function () {
         });
     });
 
+    describe("collapse()", function () {
+        function doCollapse(v){
+            return doBoth(
+                () => Vector.collapse(v),
+                () => v.collapse(),
+                assertVectorsExactlyEqual
+            );
+        }
+        it("should do nothing to a 1D vector", function () {
+            const v = Vector.createWithDimensions([3],3);
+            const expected = Vector.createWithDimensions([3],3);
+            assertVectorsExactlyEqual(doCollapse(v), expected);
+        });
+        it("should collapse a size [2,1] to 1D", function () {
+            const v = Vector.createWithDimensions([2,1],3);
+            const expected = Vector.createWithDimensions([2],3);
+            assertVectorsExactlyEqual(doCollapse(v), expected);
+        });
+        it("should collapse a size [1,2] to 1D", function () {
+            const v = Vector.createWithDimensions([1,2],3);
+            const expected = Vector.createWithDimensions([2],3);
+            assertVectorsExactlyEqual(doCollapse(v), expected);
+        });
+        it("should collapse a size [1,1,4,1] to 1D", function () {
+            const v = Vector.createWithDimensions([1,1,4,1],3);
+            const expected = Vector.createWithDimensions([4],3);
+            assertVectorsExactlyEqual(doCollapse(v), expected);
+        });
+        it("should throw for a vector more than one dimension with length > 1", function () {
+            const v = Vector.createWithDimensions([1,2,4,1],3);
+            assert.throws(function(){ doCollapse(v);}, Error);
+        });
+    });
 });
 
 function isAVector(v) {
