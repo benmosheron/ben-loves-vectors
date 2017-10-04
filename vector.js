@@ -288,12 +288,12 @@ function checkMatrixMultiplyDimensions(s1, s2){
     //a=b=c=n, d=1
     //b=c=n, a=d=1
     //a=d=n, b=c=1
+    //
+    // [4,3]*[3,1] this is OK!
+    // a=4, b=3, c=3, d=1
     let a = s1[0];let b = s1[1];let c = s2[0];let d = s2[1];
     // Fail if a != d (unless d is 1 and a = b) or b != c
     if(b !== c) throw new Error(`Matrix size mismatch: ${s1} * ${s2}`);
-    if(a !== d){
-        if(a !== b || d !== 1) throw new Error(`Matrix size mismatch: ${s1} * ${s2}`);
-    }
 }
 
 function getStringRec(v1){

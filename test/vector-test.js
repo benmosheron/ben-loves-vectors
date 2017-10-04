@@ -605,6 +605,24 @@ describe("vector", function () {
                  [(7*4)+(8*5)+(9*6)]]);
             assertVectorsExactlyEqual(r, expected);
         });
+        it("should multiply [m,n] * [n,1] with m > n", function () {
+            let v1 = new Vector(
+                [[1,2,3],
+                 [4,5,6],
+                 [7,8,9],
+                 [1,2,3]]);
+            let v2 = new Vector([4,5,6]).transpose();
+            let r = doBoth(
+                () => Vector.matrixMultiply(v1, v2),
+                () => v1.matrixMultiply(v2),
+            assertVectorsExactlyEqual);
+            let expected = new Vector(
+                [[(1*4)+(2*5)+(3*6)],
+                 [(4*4)+(5*5)+(6*6)],
+                 [(7*4)+(8*5)+(9*6)],
+                 [(1*4)+(2*5)+(3*6)]]);
+            assertVectorsExactlyEqual(r, expected);
+        });
         it("should multiply [n,n] * [n,n]", function () {
             let v1 = new Vector(
                 [[1,2,3],
