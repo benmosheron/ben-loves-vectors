@@ -834,6 +834,21 @@ describe("vector", function () {
             assert.throws(function(){ doCollapse(v, true);}, Error);
         });
     });
+
+    describe("mutate()", function () {
+        it("should mutate the underlying array of a vector", function () {
+            const v = Vector.createWithDimensions([2,2],3);
+            const expected = Vector.create2x2(3,3,9,3);
+            v.mutate([1,0], 9);
+            assertVectorsExactlyEqual(v, expected);
+        });
+        it("should mutate the underlying array of a vector (static)", function () {
+            const v = Vector.createWithDimensions([2,2],3);
+            const expected = Vector.create2x2(3,9,3,3);
+            Vector.mutate(v, [0,1], 9);
+            assertVectorsExactlyEqual(v, expected);
+        });
+    });
 });
 
 function isAVector(v) {

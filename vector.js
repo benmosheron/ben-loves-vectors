@@ -425,6 +425,18 @@ Vector.prototype.floor = function () { return Vector.floor(this); };
 Vector.toString = function (v) { return getStringRec(v); };
 Vector.prototype.toString = function(){ return Vector.toString(this); };
 
+// Mutate a vectors underlying array by changing the value at a location.
+// Location is an array of the indices of the location.
+Vector.mutate = function(v, locationArray, newValue){
+    const i = locationArray.shift();
+    if(locationArray.length === 0) {
+        v.array[i] = newValue;
+        return;
+    }
+    Vector.mutate(v.get(i), locationArray, newValue);
+}
+Vector.prototype.mutate = function (locationArray, newValue) { return Vector.mutate(this, locationArray, newValue); };
+
 module.exports = Vector;
 
 try {
