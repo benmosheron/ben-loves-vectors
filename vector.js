@@ -31,6 +31,7 @@ function Vector(arrayOrVector){
 // eye()
 // diagonal()
 // shortcut functions for matrixMultiply, elemwise stuff.
+// mutate functions which change array values in place (useful IRL).
 
 // todo: move these to the Vector declarations below
 // This is now officially the messiest code base ever D:
@@ -92,7 +93,7 @@ function subScalar(v1, s){
 
 // Multiply a vector by a scalar
 function multiplyScalar(v, s) {
-    return v.map(e => e * s);
+    return v.cascadeMap(e => e * s);
 }
 
 function multiplyElementWise(v1, v2) {
@@ -133,7 +134,7 @@ function matrixMultiply(v1, v2) {
 
 // Divide a vector by a scalar
 function divideScalar(v, s) {
-    return v.map(e => e / s);
+    return v.multiplyScalar(1/s);
 }
 
 // True if the v1 and v2 represent the same vectors (do not need to be the same instance).
@@ -333,6 +334,7 @@ Vector.zip = function(v1, v2, f){
 }
 Vector.prototype.zip = function(v2, f) { return Vector.zip(this, v2, f); };
 
+// Shortcut to array.reduce
 Vector.reduce = function (v, f, init) { return v.array.reduce(f, init) };
 Vector.prototype.reduce = function (f, init) { return Vector.reduce(this, f, init); };
 
@@ -355,6 +357,7 @@ Vector.cascadeReduce = function(v, f, init){
     }, init);
 }
 Vector.prototype.cascadeReduce = function(f, init){ return Vector.cascadeReduce(this, f, init); };
+
 Vector.magnitude = magnitude;
 Vector.prototype.magnitude = function () { return Vector.magnitude(this); };
 Vector.normalise = normalise;

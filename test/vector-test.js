@@ -1,5 +1,4 @@
 var assert = require('assert');
-var vector = require('../vector.js');
 let Vector = require('../vector.js');
 
 describe("vector", function () {
@@ -491,6 +490,14 @@ describe("vector", function () {
                 () => v1.sub(v2));
             assert(r.errors.both, "Both static and member functions should have thrown.");
         });
+        it("should subtract a scalar from a 3D vector", function () {
+            let v1 = Vector.createWithDimensions([3, 3, 3], 7);
+            let r = doBoth(
+                () => Vector.subScalar(v1, 10),
+                () => v1.subScalar(10),
+                assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, Vector.createWithDimensions([3, 3, 3], -3));
+        });
     });
 
     describe("subScalar()", function(){
@@ -513,6 +520,15 @@ describe("vector", function () {
                 () => v.multiplyScalar(s),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, new Vector([-10, 20, -30]));
+        });
+        it("should multiply a 3D vector and a scalar", function () {
+            let v = Vector.createWithDimensions([3, 3], 10);
+            let s = -10;
+            let r = doBoth(
+                () => Vector.multiplyScalar(v, s),
+                () => v.multiplyScalar(s),
+            assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, Vector.createWithDimensions([3, 3], -100));
         });
     });
 
@@ -619,6 +635,15 @@ describe("vector", function () {
                 () => v.divideScalar(s),
                 assertVectorsBasicallyEqual);
             assertVectorsBasicallyEqual(r, new Vector([-0.1, 0.2, -0.3]));
+        });
+        it("should divide a 3D vector by a scalar", function () {
+            let v = Vector.createWithDimensions([3, 3], 10);
+            let s = -10;
+            let r = doBoth(
+                () => Vector.divideScalar(v, s),
+                () => v.divideScalar(s),
+            assertVectorsExactlyEqual);
+            assertVectorsExactlyEqual(r, Vector.createWithDimensions([3, 3], -1));
         });
     });
 
