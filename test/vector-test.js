@@ -6,6 +6,7 @@ describe("vector", function () {
     let x = 1.01;
     let y = -39.01;
     let z = 1093.1239;
+    let noop = () => null;
     describe("new Vector()", function () {
         it("should throw if the argument is not an array", function () {
             assert.throws(function () { new Vector(); }, Error);
@@ -381,7 +382,8 @@ describe("vector", function () {
             let n = doBoth(
                 () => Vector.transpose(v),
                 () => v.transpose(),
-                () => null);
+                noop,
+                true);
             assert.equal(n.errors.both, true);
         });
     });
@@ -431,7 +433,9 @@ describe("vector", function () {
             let v2 = new Vector([2, 2, 3]);
             let r = doBoth(
                 () => Vector.add(v1, v2),
-                () => v1.add(v2));
+                () => v1.add(v2),
+                noop,
+                true);
             assert(r.errors.both, "Both static and member functions should have thrown.");
         });
         it("should throw if vectors have different sizes", function () {
@@ -439,7 +443,9 @@ describe("vector", function () {
             let v2 = Vector.create2(0,0);
             let r = doBoth(
                 () => Vector.add(v1, v2),
-                () => v1.add(v2));
+                () => v1.add(v2),
+                noop,
+                true);
             assert(r.errors.both, "Both static and member functions should have thrown.");
         });
     });
@@ -487,7 +493,9 @@ describe("vector", function () {
             let v2 = new Vector([2, 2, 3]);
             let r = doBoth(
                 () => Vector.sub(v1, v2),
-                () => v1.sub(v2));
+                () => v1.sub(v2),
+                () => null,
+                true);
             assert(r.errors.both, "Both static and member functions should have thrown.");
         });
         it("should subtract a scalar from a 3D vector", function () {
@@ -758,11 +766,12 @@ describe("vector", function () {
     });
 
     describe("collapse()", function () {
-        function doCollapse(v){
+        function doCollapse(v, expectError){
             return doBoth(
                 () => Vector.collapse(v),
                 () => v.collapse(),
-                assertVectorsExactlyEqual
+                assertVectorsExactlyEqual,
+                undef(expectError) ? false : true
             );
         }
         it("should do nothing to a 1D vector", function () {
@@ -787,7 +796,7 @@ describe("vector", function () {
         });
         it("should throw for a vector more than one dimension with length > 1", function () {
             const v = Vector.createWithDimensions([1,2,4,1],3);
-            assert.throws(function(){ doCollapse(v);}, Error);
+            assert.throws(function(){ doCollapse(v, true);}, Error);
         });
     });
 });
@@ -799,15 +808,18 @@ function isAVector(v) {
     assert.strictEqual(v.isAVector, true, "isAVector != true");
 }
 
-function doBoth(staticFunction, memberFunction, assertion) {
+function doBoth(staticFunction, memberFunction, assertion, expectError) {
     let errors = {any: false};
     let s;
     let m;
+
+    function log(static, ex){if(!expectError)console.log(`DoBoth error [${static ? "static" : "member"}] ${ex}`);}
 
     try{
         s = staticFunction();
     }
     catch (ex) {
+        log(true, ex);
         errors.any = true;
         errors.static = true;
     }
@@ -816,6 +828,7 @@ function doBoth(staticFunction, memberFunction, assertion) {
         m = memberFunction();
     }
     catch (ex) {
+        log(false, ex);
         errors.any = true;
         errors.member = true;
     }
@@ -872,4 +885,8 @@ function numberArraysEqual(first, second){
         if(first[i] !== second[i]) return false;
     }
     return true;
+}
+
+function undef(x){
+    return typeof x === "undefined";
 }
