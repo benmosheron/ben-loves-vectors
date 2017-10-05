@@ -167,11 +167,12 @@ function createWithDimensions(dims, val){
     if(!Array.isArray(dims)) throw new Error("dims must be an array.");
     if(undef(val)) throw new Error("val must be defined.");
     
-    const l = dims.pop();
+    const l = dims[dims.length - 1];
+    const nextDims = dims.slice(0, -1);
     const array = new Array(l).fill(val);
 
-    if(dims.length === 0) return new Vector(array);
-    return createWithDimensions(dims, array);
+    if(nextDims.length === 0) return new Vector(array);
+    return createWithDimensions(nextDims, array);
 }
 
 // Private functions
@@ -209,8 +210,8 @@ function getDepth(array){
 
 function sizeRec(v, dim, sizeArray){
     if(dim === 0) return sizeArray;
-    sizeArray.push(v.length);
-    return sizeRec(v.get(0), dim - 1, sizeArray);
+    const nextArray = sizeArray.concat([v.length]);
+    return sizeRec(v.get(0), dim - 1, nextArray);
 }
 
 function getElementFromIndex(vector, i){
@@ -224,8 +225,9 @@ function getElementFromIndexArray(vector, indexArray){
     // Check dimension is OK
     if(indexArray.length > vector.dimension) throw new Error(`Too many indices [${indexArray.length}] to access a ${vector.dimension}D vector.`);
     if(indexArray.length === 1) return getElementFromIndex(vector, indexArray[0]);
-    const i = indexArray.shift();
-    return getElementFromIndexArray(getElementFromIndex(vector, i), indexArray);
+    const i = indexArray[0];
+    const nextArray = indexArray.slice(1);
+    return getElementFromIndexArray(getElementFromIndex(vector, i), nextArray);
 }
 
 function getElement(vector, i){
@@ -271,6 +273,8 @@ function getStringRec(v1){
 function undef(obj){
     return typeof obj === "undefined";
 }
+
+// Vector methods
 
 Vector.create2 =  create2;
 Vector.create2x2 =  create2x2;
@@ -428,12 +432,13 @@ Vector.prototype.toString = function(){ return Vector.toString(this); };
 // Mutate a vectors underlying array by changing the value at a location.
 // Location is an array of the indices of the location.
 Vector.mutate = function(v, locationArray, newValue){
-    const i = locationArray.shift();
-    if(locationArray.length === 0) {
+    const i = locationArray[0];
+    const nextArray = locationArray.slice(1);
+    if(nextArray.length === 0) {
         v.array[i] = newValue;
         return;
     }
-    Vector.mutate(v.get(i), locationArray, newValue);
+    Vector.mutate(v.get(i), nextArray, newValue);
 }
 Vector.prototype.mutate = function (locationArray, newValue) { return Vector.mutate(this, locationArray, newValue); };
 
